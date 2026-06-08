@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StudieSQL</title>
-    <link rel="stylesheet" href="styles.css?v=20260608c" />
+    <link rel="stylesheet" href="styles.css?v=20260608d" />
   </head>
   <body>
     <main class="app-shell">
@@ -26,10 +26,42 @@
       <section class="stage-board" aria-label="단계 선택" data-tour="stages">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Stage Board</p>
-            <h2>사건 파일</h2>
+            <p class="eyebrow">Problem Board</p>
+            <h2>문제 목록</h2>
           </div>
           <span id="stageProgressSummary">0 / 3 완료</span>
+        </div>
+        <div class="ops-dashboard" aria-label="운영 현황">
+          <div class="stat-card">
+            <span>완료 문제</span>
+            <strong id="solvedStat">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>무힌트 완료</span>
+            <strong id="cleanSolveStat">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>총 쿼리</span>
+            <strong id="queryStat">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>제출</span>
+            <strong id="submitStat">0</strong>
+          </div>
+          <div class="db-note">
+            <span>DB</span>
+            <strong>브라우저 SQLite 자동 생성</strong>
+          </div>
+        </div>
+        <div class="problem-filters" aria-label="문제 필터">
+          <div>
+            <span>난이도</span>
+            <div id="levelFilters" class="filter-buttons"></div>
+          </div>
+          <div>
+            <span>개념</span>
+            <div id="conceptFilters" class="filter-buttons"></div>
+          </div>
         </div>
         <div id="stageGrid" class="stage-grid"></div>
       </section>
@@ -148,6 +180,6 @@
     </div>
 
     <script src="vendor/sql-wasm.js"></script>
-    <script src="app.js?v=20260608c"></script>
+    <script src="app.js?v=20260608d"></script>
   </body>
 </html>

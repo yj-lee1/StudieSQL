@@ -127,6 +127,83 @@ button {
   font-weight: 800;
 }
 
+.ops-dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(230px, 1.35fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.stat-card,
+.db-note {
+  min-height: 78px;
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(18, 20, 23, 0.74);
+  box-shadow: var(--shadow);
+}
+
+.stat-card span,
+.db-note span,
+.problem-filters span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.stat-card strong {
+  color: #f1d28b;
+  font-size: 28px;
+}
+
+.db-note strong {
+  color: #dcebf8;
+  font-size: 15px;
+}
+
+.problem-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.problem-filters > div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(18, 20, 23, 0.68);
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.filter-buttons button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: #e7dfd1;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.filter-buttons button.active {
+  border-color: rgba(226, 183, 91, 0.72);
+  color: #16100b;
+  background: var(--accent-2);
+}
+
 .stage-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -183,6 +260,33 @@ button {
   font-size: 14px;
   font-style: normal;
   line-height: 1.45;
+}
+
+.concept-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.concept-row small {
+  padding: 4px 7px;
+  border: 1px solid rgba(116, 168, 198, 0.28);
+  border-radius: 999px;
+  color: #dcebf8;
+  background: rgba(116, 168, 198, 0.12);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.empty-card {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  grid-column: 1 / -1;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  background: rgba(18, 20, 23, 0.72);
 }
 
 .investigation-shell {
@@ -698,6 +802,14 @@ td {
     grid-template-columns: 1fr;
   }
 
+  .ops-dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .db-note {
+    grid-column: 1 / -1;
+  }
+
   .case-panel,
   .report-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -720,7 +832,12 @@ td {
 
   .case-panel,
   .report-panel,
+  .problem-filters,
   .map-body {
+    grid-template-columns: 1fr;
+  }
+
+  .ops-dashboard {
     grid-template-columns: 1fr;
   }
 

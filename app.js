@@ -230,7 +230,11 @@ const relations = [
 const stages = {
   murder: {
     number: 1,
+    level: "Lv.1",
     difficulty: "입문",
+    track: "추론",
+    estimatedMinutes: 12,
+    concepts: ["SELECT", "WHERE", "ORDER BY"],
     title: "미술관 살인사건",
     code: "HM-2026-0518",
     brief:
@@ -265,7 +269,11 @@ const stages = {
   },
   cyber: {
     number: 2,
+    level: "Lv.3",
     difficulty: "중급",
+    track: "보안",
+    estimatedMinutes: 20,
+    concepts: ["JOIN", "LIKE", "서브쿼리"],
     title: "침입 로그 추적",
     code: "IR-2026-0602",
     brief:
@@ -288,7 +296,11 @@ const stages = {
   },
   supply: {
     number: 3,
+    level: "Lv.4",
     difficulty: "상급",
+    track: "운영",
+    estimatedMinutes: 28,
+    concepts: ["JOIN", "GROUP BY", "HAVING"],
     title: "보급망 이상 징후",
     code: "OP-2026-0711",
     brief:
@@ -314,12 +326,21 @@ let SQLRuntime;
 let sqlite;
 let currentStageKey = "murder";
 let currentTourIndex = 0;
+let activeLevelFilter = "전체";
+let activeConceptFilter = "전체";
 const completedEvidence = new Map(Object.keys(stages).map((key) => [key, new Set()]));
 const completedStages = new Set(JSON.parse(window.localStorage.getItem("sqlLabCompletedStages") || "[]"));
+const stageMetrics = loadStageMetrics();
 
 const elements = {
   stageCode: document.querySelector("#stageCode"),
   stageProgressSummary: document.querySelector("#stageProgressSummary"),
+  solvedStat: document.querySelector("#solvedStat"),
+  cleanSolveStat: document.querySelector("#cleanSolveStat"),
+  queryStat: document.querySelector("#queryStat"),
+  submitStat: document.querySelector("#submitStat"),
+  levelFilters: document.querySelector("#levelFilters"),
+  conceptFilters: document.querySelector("#conceptFilters"),
   stageGrid: document.querySelector("#stageGrid"),
   stageTitle: document.querySelector("#stageTitle"),
   difficultyBadge: document.querySelector("#difficultyBadge"),
@@ -358,6 +379,7 @@ const elements = {
 
 async function init() {
   bindEvents();
+  renderFilters();
   renderStageBoard();
   applyStage(currentStageKey);
   setMessage("SQLite 엔진을 준비하고 있습니다.", "");
@@ -374,6 +396,20 @@ function bindEvents() {
     const button = event.target.closest("[data-stage]");
     if (!button) return;
     applyStage(button.dataset.stage);
+  });
+  elements.levelFilters.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-level]");
+    if (!button) return;
+    activeLevelFilter = button.dataset.level;
+    renderFilters();
+    renderStageBoard();
+  });
+  elements.conceptFilters.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-concept]");
+    if (!button) return;
+    activeConceptFilter = button.dataset.concept;
+    renderFilters();
+    renderStageBoard();
   });
 
   elements.runButton.addEventListener("click", runCurrentQuery);
@@ -395,6 +431,13 @@ function bindEvents() {
     if (!node) return;
     inspectTable(node.dataset.table);
   });
+  elements.hintBox.addEventListener("toggle", () => {
+    if (!elements.hintBox.open) return;
+    const metrics = metricsFor(currentStageKey);
+    metrics.hintUsed = true;
+    saveStageMetrics();
+    renderStageBoard();
+  });
   elements.submitReportButton.addEventListener("click", submitReport);
   elements.tutorialButton.addEventListener("click", openTutorial);
   elements.tutorialSkip.addEventListener("click", closeTutorial);
@@ -403,6 +446,30 @@ function bindEvents() {
 
 function currentStage() {
   return stages[currentStageKey];
+}
+
+function loadStageMetrics() {
+  const saved = JSON.parse(window.localStorage.getItem("sqlLabStageMetrics") || "{}");
+  Object.keys(stages).forEach((key) => {
+    saved[key] = {
+      queryCount: 0,
+      submitCount: 0,
+      hintUsed: false,
+      solvedAt: "",
+      lastPlayedAt: "",
+      ...(saved[key] || {}),
+    };
+    if (completedStages.has(key) && !saved[key].solvedAt) saved[key].solvedAt = "legacy";
+  });
+  return saved;
+}
+
+function metricsFor(stageKey) {
+  return stageMetrics[stageKey];
+}
+
+function saveStageMetrics() {
+  window.localStorage.setItem("sqlLabStageMetrics", JSON.stringify(stageMetrics));
 }
 
 function createDatabase() {
@@ -443,7 +510,7 @@ function applyStage(stageKey) {
   const stage = currentStage();
   elements.stageCode.textContent = `${stage.number}단계`;
   elements.stageTitle.textContent = `${stage.number}단계 ${stage.title}`;
-  elements.difficultyBadge.textContent = stage.difficulty;
+  elements.difficultyBadge.textContent = `${stage.level} · ${stage.difficulty}`;
   elements.stageBrief.textContent = stage.brief;
   elements.stageObjective.textContent = stage.objective;
   elements.databaseLabel.textContent = stage.databaseLabel;
@@ -455,6 +522,9 @@ function applyStage(stageKey) {
   elements.secondaryInput.value = "";
   elements.verdict.textContent = "";
   elements.sqlInput.value = "";
+  const metrics = metricsFor(stageKey);
+  metrics.lastPlayedAt = new Date().toISOString();
+  saveStageMetrics();
   renderTable([], []);
   renderStageBoard();
   renderEvidence();
@@ -464,26 +534,58 @@ function applyStage(stageKey) {
 }
 
 function renderStageBoard() {
+  renderStats();
   const finished = completedStages.size;
   const total = Object.keys(stages).length;
   elements.stageProgressSummary.textContent = `${finished} / ${total} 완료`;
-  elements.stageGrid.innerHTML = Object.entries(stages)
+  const filteredStages = Object.entries(stages).filter(([, stage]) => {
+    const levelMatches = activeLevelFilter === "전체" || stage.level === activeLevelFilter;
+    const conceptMatches = activeConceptFilter === "전체" || stage.concepts.includes(activeConceptFilter);
+    return levelMatches && conceptMatches;
+  });
+  elements.stageGrid.innerHTML = filteredStages
     .map(([key, stage]) => {
       const evidence = completedEvidence.get(key);
+      const metrics = metricsFor(key);
       const status = completedStages.has(key) ? "완료" : key === currentStageKey ? "진행 중" : "진행 가능";
       const active = key === currentStageKey ? "active" : "";
       const done = completedStages.has(key) ? "done" : "";
       return `
         <button class="stage-card ${active} ${done}" type="button" data-stage="${key}">
           <span class="stage-number">${stage.number}</span>
-          <span class="stage-meta">${stage.difficulty} · ${status}</span>
+          <span class="stage-meta">${stage.level} · ${stage.track} · ${status}</span>
           <strong>${stage.title}</strong>
           <span>${stage.brief}</span>
-          <em>${evidence.size} / ${stage.evidence.length} 증거</em>
+          <div class="concept-row">
+            ${stage.concepts.map((concept) => `<small>${concept}</small>`).join("")}
+          </div>
+          <em>${stage.estimatedMinutes}분 · ${evidence.size} / ${stage.evidence.length} 증거 · 쿼리 ${metrics.queryCount} · 제출 ${metrics.submitCount}</em>
         </button>
       `;
     })
     .join("");
+  if (!filteredStages.length) {
+    elements.stageGrid.innerHTML = `<div class="empty-card">조건에 맞는 문제가 없습니다.</div>`;
+  }
+}
+
+function renderFilters() {
+  const levels = ["전체", ...new Set(Object.values(stages).map((stage) => stage.level))];
+  const concepts = ["전체", ...new Set(Object.values(stages).flatMap((stage) => stage.concepts))];
+  elements.levelFilters.innerHTML = levels
+    .map((level) => `<button class="${level === activeLevelFilter ? "active" : ""}" type="button" data-level="${level}">${level}</button>`)
+    .join("");
+  elements.conceptFilters.innerHTML = concepts
+    .map((concept) => `<button class="${concept === activeConceptFilter ? "active" : ""}" type="button" data-concept="${concept}">${concept}</button>`)
+    .join("");
+}
+
+function renderStats() {
+  const metrics = Object.values(stageMetrics);
+  elements.solvedStat.textContent = completedStages.size;
+  elements.cleanSolveStat.textContent = metrics.filter((item) => item.solvedAt && !item.hintUsed).length;
+  elements.queryStat.textContent = metrics.reduce((sum, item) => sum + item.queryCount, 0);
+  elements.submitStat.textContent = metrics.reduce((sum, item) => sum + item.submitCount, 0);
 }
 
 function renderEvidence() {
@@ -505,12 +607,17 @@ function renderEvidence() {
 
 function runCurrentQuery() {
   try {
+    const metrics = metricsFor(currentStageKey);
+    metrics.queryCount += 1;
+    metrics.lastPlayedAt = new Date().toISOString();
+    saveStageMetrics();
     const result = executeSql(elements.sqlInput.value);
     renderTable(result.rows, result.columns);
     evaluateProgress(result.rows);
     setMessage(`${result.rows.length}개 행을 찾았습니다.`, "success");
   } catch (error) {
     renderTable([], []);
+    renderStageBoard();
     setMessage(error.message, "error");
   }
 }
@@ -568,10 +675,15 @@ function rowsToSearchText(rows) {
 }
 
 function submitReport() {
+  const metrics = metricsFor(currentStageKey);
+  metrics.submitCount += 1;
+  metrics.lastPlayedAt = new Date().toISOString();
   if (isCorrectReport(elements.primaryInput.value, elements.secondaryInput.value)) {
     const evidenceSet = completedEvidence.get(currentStageKey);
     currentStage().evidence.forEach((item) => evidenceSet.add(item.id));
     completedStages.add(currentStageKey);
+    metrics.solvedAt = metrics.solvedAt || new Date().toISOString();
+    saveStageMetrics();
     window.localStorage.setItem("sqlLabCompletedStages", JSON.stringify([...completedStages]));
     renderEvidence();
     renderStageBoard();
@@ -579,6 +691,8 @@ function submitReport() {
     elements.verdict.style.color = "#a8e0b7";
     return;
   }
+  saveStageMetrics();
+  renderStageBoard();
   elements.verdict.textContent = "아직 결론이 맞지 않습니다. 데이터 지도에서 연결 키를 다시 확인하고 결과를 더 좁혀 보세요.";
   elements.verdict.style.color = "#ffb0a5";
 }
