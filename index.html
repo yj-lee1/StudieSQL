@@ -4,144 +4,168 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StudieSQL</title>
-    <link rel="stylesheet" href="styles.css?v=20260608d" />
+    <link rel="stylesheet" href="styles.css?v=20260608e" />
   </head>
   <body>
     <main class="app-shell">
-      <section class="case-hero" aria-label="사건 연구소">
-        <div class="hero-copy">
-          <p class="eyebrow">스터디스큐엘 · 브라우저 내장 SQLite 실습 DB</p>
-          <h1>StudieSQL</h1>
-          <p>
-            단계마다 다른 사건 파일을 열고, 데이터 지도와 직접 작성한 SQL만으로 결론을 좁혀가세요.
-            이곳의 콘솔은 PostgreSQL이나 MySQL이 아닌 SQLite로 실행됩니다.
-          </p>
-        </div>
-        <div class="case-stamp">
-          <span id="stageCodeLabel">현재 단계</span>
-          <strong id="stageCode">1단계</strong>
-        </div>
-      </section>
+      <header class="service-nav" aria-label="서비스 내비게이션">
+        <button id="navHomeButton" class="brand-button" type="button">StudieSQL</button>
+        <nav>
+          <button class="nav-button active" type="button" data-nav="problems">문제</button>
+          <button class="nav-button" type="button" data-nav="learn">학습</button>
+          <button class="nav-button" type="button" data-nav="stats">기록</button>
+        </nav>
+        <span id="navCurrentCase">문제 목록</span>
+      </header>
 
-      <section class="stage-board" aria-label="단계 선택" data-tour="stages">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Problem Board</p>
-            <h2>문제 목록</h2>
+      <div id="homeView" class="view home-view">
+        <section class="case-hero" aria-label="사건 연구소">
+          <div class="hero-copy">
+            <p class="eyebrow">스터디스큐엘 · 브라우저 내장 SQLite 실습 DB</p>
+            <h1>StudieSQL</h1>
+            <p>
+              단계마다 다른 사건 파일을 열고, 데이터 지도와 직접 작성한 SQL만으로 결론을 좁혀가세요.
+              이곳의 콘솔은 PostgreSQL이나 MySQL이 아닌 SQLite로 실행됩니다.
+            </p>
           </div>
-          <span id="stageProgressSummary">0 / 3 완료</span>
-        </div>
-        <div class="ops-dashboard" aria-label="운영 현황">
-          <div class="stat-card">
-            <span>완료 문제</span>
-            <strong id="solvedStat">0</strong>
-          </div>
-          <div class="stat-card">
-            <span>무힌트 완료</span>
-            <strong id="cleanSolveStat">0</strong>
-          </div>
-          <div class="stat-card">
-            <span>총 쿼리</span>
-            <strong id="queryStat">0</strong>
-          </div>
-          <div class="stat-card">
-            <span>제출</span>
-            <strong id="submitStat">0</strong>
-          </div>
-          <div class="db-note">
-            <span>DB</span>
-            <strong>브라우저 SQLite 자동 생성</strong>
-          </div>
-        </div>
-        <div class="problem-filters" aria-label="문제 필터">
-          <div>
-            <span>난이도</span>
-            <div id="levelFilters" class="filter-buttons"></div>
-          </div>
-          <div>
-            <span>개념</span>
-            <div id="conceptFilters" class="filter-buttons"></div>
-          </div>
-        </div>
-        <div id="stageGrid" class="stage-grid"></div>
-      </section>
-
-      <section class="investigation-shell" aria-label="조사 작업대">
-        <aside class="case-panel" data-tour="case">
-          <div class="panel">
-            <div class="panel-title">
-              <span id="stageTitle">1단계 미술관 살인사건</span>
-              <strong id="difficultyBadge">입문</strong>
-            </div>
-            <p id="stageBrief" class="case-brief"></p>
-            <div class="objective-box">
-              <span>목표</span>
-              <p id="stageObjective"></p>
-            </div>
-            <button id="mapButton" class="secondary-button wide-button" type="button" data-tour="map-button">
-              데이터 지도 열기
-            </button>
-          </div>
-
-          <div class="panel">
-            <div class="panel-title">
-              <span>증거 노트</span>
-              <strong id="progressText">0 / 6</strong>
-            </div>
-            <ol id="evidenceList" class="evidence-list"></ol>
-            <details id="hintBox" class="hint-box">
-              <summary>힌트 보기</summary>
-              <p id="hintText"></p>
-            </details>
-          </div>
-        </aside>
-
-        <section class="query-area" data-tour="console">
-          <div class="toolbar">
-            <div>
-              <p id="databaseLabel" class="eyebrow">SQLite 실행 준비 중</p>
-              <h2>조사 콘솔</h2>
-            </div>
-            <div class="toolbar-actions">
-              <button id="tutorialButton" class="secondary-button" type="button">튜토리얼</button>
-              <button id="clearButton" class="icon-button" type="button" title="콘솔 비우기" aria-label="콘솔 비우기">×</button>
-              <button id="runButton" class="primary-button" type="button">실행</button>
-            </div>
-          </div>
-
-          <textarea
-            id="sqlInput"
-            spellcheck="false"
-            placeholder="여기에 SQL을 입력하세요. 예: SELECT * FROM 테이블명 LIMIT 5;"
-          ></textarea>
-
-          <div id="message" class="message" role="status">데이터 지도를 열어 테이블을 살펴본 뒤 직접 쿼리를 작성해 보세요.</div>
-
-          <div class="result-wrap">
-            <table id="resultTable"></table>
+          <div class="case-stamp">
+            <span id="stageCodeLabel">현재 단계</span>
+            <strong id="stageCode">1단계</strong>
           </div>
         </section>
 
-        <aside class="report-panel" data-tour="report">
-          <div class="panel">
-            <div class="panel-title">
-              <span>최종 보고서</span>
+        <section class="stage-board" aria-label="단계 선택" data-tour="stages">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Problem Board</p>
+              <h2>문제 목록</h2>
             </div>
-            <div class="accusation-panel">
-              <label>
-                <span id="primaryAnswerLabel">실행범</span>
-                <input id="primaryInput" type="text" autocomplete="off" placeholder="이름 또는 id 입력" />
-              </label>
-              <label>
-                <span id="secondaryAnswerLabel">배후</span>
-                <input id="secondaryInput" type="text" autocomplete="off" placeholder="이름 또는 id 입력" />
-              </label>
-              <button id="submitReportButton" class="primary-button" type="button">보고서 제출</button>
-              <p id="verdict" class="verdict"></p>
+            <span id="stageProgressSummary">0 / 3 완료</span>
+          </div>
+          <div class="ops-dashboard" aria-label="운영 현황">
+            <div class="stat-card">
+              <span>완료 문제</span>
+              <strong id="solvedStat">0</strong>
+            </div>
+            <div class="stat-card">
+              <span>무힌트 완료</span>
+              <strong id="cleanSolveStat">0</strong>
+            </div>
+            <div class="stat-card">
+              <span>총 쿼리</span>
+              <strong id="queryStat">0</strong>
+            </div>
+            <div class="stat-card">
+              <span>제출</span>
+              <strong id="submitStat">0</strong>
+            </div>
+            <div class="db-note">
+              <span>DB</span>
+              <strong>브라우저 SQLite 자동 생성</strong>
             </div>
           </div>
-        </aside>
-      </section>
+          <div class="problem-filters" aria-label="문제 필터">
+            <div>
+              <span>난이도</span>
+              <div id="levelFilters" class="filter-buttons"></div>
+            </div>
+            <div>
+              <span>개념</span>
+              <div id="conceptFilters" class="filter-buttons"></div>
+            </div>
+          </div>
+          <div id="stageGrid" class="stage-grid"></div>
+        </section>
+      </div>
+
+      <div id="caseView" class="view case-view hidden">
+        <section class="case-detail-header" aria-label="선택한 사건">
+          <button id="backToProblemsButton" class="secondary-button" type="button">문제 목록</button>
+          <div>
+            <p id="detailEyebrow" class="eyebrow">Lv.1 · 추론</p>
+            <h1 id="detailTitle">미술관 살인사건</h1>
+            <p id="detailSummary"></p>
+          </div>
+          <div id="detailMeta" class="detail-meta"></div>
+        </section>
+
+        <section class="investigation-shell" aria-label="조사 작업대">
+          <aside class="case-panel" data-tour="case">
+            <div class="panel">
+              <div class="panel-title">
+                <span id="stageTitle">1단계 미술관 살인사건</span>
+                <strong id="difficultyBadge">입문</strong>
+              </div>
+              <p id="stageBrief" class="case-brief"></p>
+              <div class="objective-box">
+                <span>목표</span>
+                <p id="stageObjective"></p>
+              </div>
+              <button id="mapButton" class="secondary-button wide-button" type="button" data-tour="map-button">
+                데이터 지도 열기
+              </button>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">
+                <span>증거 노트</span>
+                <strong id="progressText">0 / 6</strong>
+              </div>
+              <ol id="evidenceList" class="evidence-list"></ol>
+              <details id="hintBox" class="hint-box">
+                <summary>힌트 보기</summary>
+                <p id="hintText"></p>
+              </details>
+            </div>
+          </aside>
+
+          <section class="query-area" data-tour="console">
+            <div class="toolbar">
+              <div>
+                <p id="databaseLabel" class="eyebrow">SQLite 실행 준비 중</p>
+                <h2>조사 콘솔</h2>
+              </div>
+              <div class="toolbar-actions">
+                <button id="tutorialButton" class="secondary-button" type="button">튜토리얼</button>
+                <button id="clearButton" class="icon-button" type="button" title="콘솔 비우기" aria-label="콘솔 비우기">×</button>
+                <button id="runButton" class="primary-button" type="button">실행</button>
+              </div>
+            </div>
+
+            <textarea
+              id="sqlInput"
+              spellcheck="false"
+              placeholder="여기에 SQL을 입력하세요. 예: SELECT * FROM 테이블명 LIMIT 5;"
+            ></textarea>
+
+            <div id="message" class="message" role="status">데이터 지도를 열어 테이블을 살펴본 뒤 직접 쿼리를 작성해 보세요.</div>
+
+            <div class="result-wrap">
+              <table id="resultTable"></table>
+            </div>
+          </section>
+
+          <aside class="report-panel" data-tour="report">
+            <div class="panel">
+              <div class="panel-title">
+                <span>최종 보고서</span>
+              </div>
+              <div class="accusation-panel">
+                <label>
+                  <span id="primaryAnswerLabel">실행범</span>
+                  <input id="primaryInput" type="text" autocomplete="off" placeholder="이름 또는 id 입력" />
+                </label>
+                <label>
+                  <span id="secondaryAnswerLabel">배후</span>
+                  <input id="secondaryInput" type="text" autocomplete="off" placeholder="이름 또는 id 입력" />
+                </label>
+                <button id="submitReportButton" class="primary-button" type="button">보고서 제출</button>
+                <p id="verdict" class="verdict"></p>
+              </div>
+            </div>
+          </aside>
+        </section>
+      </div>
     </main>
 
     <section id="dataMapOverlay" class="data-map-overlay hidden" aria-label="데이터 지도" data-tour="map">
@@ -180,6 +204,6 @@
     </div>
 
     <script src="vendor/sql-wasm.js"></script>
-    <script src="app.js?v=20260608d"></script>
+    <script src="app.js?v=20260608e"></script>
   </body>
 </html>

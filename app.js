@@ -333,6 +333,15 @@ const completedStages = new Set(JSON.parse(window.localStorage.getItem("sqlLabCo
 const stageMetrics = loadStageMetrics();
 
 const elements = {
+  homeView: document.querySelector("#homeView"),
+  caseView: document.querySelector("#caseView"),
+  navHomeButton: document.querySelector("#navHomeButton"),
+  navCurrentCase: document.querySelector("#navCurrentCase"),
+  backToProblemsButton: document.querySelector("#backToProblemsButton"),
+  detailEyebrow: document.querySelector("#detailEyebrow"),
+  detailTitle: document.querySelector("#detailTitle"),
+  detailSummary: document.querySelector("#detailSummary"),
+  detailMeta: document.querySelector("#detailMeta"),
   stageCode: document.querySelector("#stageCode"),
   stageProgressSummary: document.querySelector("#stageProgressSummary"),
   solvedStat: document.querySelector("#solvedStat"),
@@ -388,6 +397,7 @@ async function init() {
   elements.databaseLabel.textContent = currentStage().databaseLabel;
   setMessage("데이터 지도를 열어 테이블을 살펴본 뒤 직접 쿼리를 작성해 보세요.", "");
   window.caseGame = { executeSql, isCorrectReport };
+  renderRoute({ replace: true });
   if (!window.localStorage.getItem("sqlLabTourSeen")) openTutorial();
 }
 
@@ -395,8 +405,14 @@ function bindEvents() {
   elements.stageGrid.addEventListener("click", (event) => {
     const button = event.target.closest("[data-stage]");
     if (!button) return;
-    applyStage(button.dataset.stage);
+    navigateToStage(button.dataset.stage);
   });
+  elements.navHomeButton.addEventListener("click", navigateToProblemList);
+  elements.backToProblemsButton.addEventListener("click", navigateToProblemList);
+  document.querySelectorAll("[data-nav]").forEach((button) => {
+    button.addEventListener("click", () => navigateToProblemList());
+  });
+  window.addEventListener("hashchange", () => renderRoute());
   elements.levelFilters.addEventListener("click", (event) => {
     const button = event.target.closest("[data-level]");
     if (!button) return;
@@ -446,6 +462,68 @@ function bindEvents() {
 
 function currentStage() {
   return stages[currentStageKey];
+}
+
+function navigateToProblemList() {
+  if (window.location.hash === "#/problems" || window.location.hash === "") {
+    renderRoute();
+    return;
+  }
+  window.location.hash = "#/problems";
+}
+
+function navigateToStage(stageKey) {
+  if (!stages[stageKey]) return;
+  const targetHash = `#/problems/${stageKey}`;
+  if (window.location.hash === targetHash) {
+    renderRoute();
+    return;
+  }
+  window.location.hash = targetHash;
+}
+
+function renderRoute({ replace = false } = {}) {
+  const stageKey = parseStageFromHash();
+  if (stageKey) {
+    showCaseView(stageKey);
+    return;
+  }
+
+  if (replace && !window.location.hash) {
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#/problems`);
+  }
+  showProblemListView();
+}
+
+function parseStageFromHash() {
+  const match = window.location.hash.match(/^#\/problems\/([a-z0-9_-]+)$/i);
+  const key = match?.[1];
+  return stages[key] ? key : "";
+}
+
+function showProblemListView() {
+  elements.homeView.classList.remove("hidden");
+  elements.caseView.classList.add("hidden");
+  elements.navCurrentCase.textContent = "문제 목록";
+  closeDataMap();
+  renderStageBoard();
+  setActiveNav("problems");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showCaseView(stageKey) {
+  elements.homeView.classList.add("hidden");
+  elements.caseView.classList.remove("hidden");
+  applyStage(stageKey);
+  closeDataMap();
+  setActiveNav("problems");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function setActiveNav(navName) {
+  document.querySelectorAll("[data-nav]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.nav === navName);
+  });
 }
 
 function loadStageMetrics() {
@@ -509,6 +587,11 @@ function applyStage(stageKey) {
   currentStageKey = stageKey;
   const stage = currentStage();
   elements.stageCode.textContent = `${stage.number}단계`;
+  elements.navCurrentCase.textContent = `${stage.number}단계 ${stage.title}`;
+  elements.detailEyebrow.textContent = `${stage.level} · ${stage.track} · ${stage.estimatedMinutes}분`;
+  elements.detailTitle.textContent = stage.title;
+  elements.detailSummary.textContent = stage.brief;
+  elements.detailMeta.innerHTML = stage.concepts.map((concept) => `<span>${concept}</span>`).join("");
   elements.stageTitle.textContent = `${stage.number}단계 ${stage.title}`;
   elements.difficultyBadge.textContent = `${stage.level} · ${stage.difficulty}`;
   elements.stageBrief.textContent = stage.brief;

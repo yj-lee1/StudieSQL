@@ -45,6 +45,66 @@ button {
   margin: 0 auto;
 }
 
+.hidden {
+  display: none !important;
+}
+
+.service-nav {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px clamp(14px, 3vw, 34px);
+  border-bottom: 1px solid rgba(245, 241, 232, 0.12);
+  background: rgba(8, 9, 11, 0.82);
+  backdrop-filter: blur(18px);
+}
+
+.brand-button {
+  min-height: 38px;
+  border: 0;
+  color: var(--accent-2);
+  background: transparent;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.service-nav nav {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.nav-button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: #d7d0c5;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.nav-button.active {
+  border-color: rgba(226, 183, 91, 0.42);
+  color: #191510;
+  background: var(--accent-2);
+}
+
+#navCurrentCase {
+  max-width: 260px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .case-hero {
   min-height: clamp(260px, 34vh, 400px);
   display: grid;
@@ -296,6 +356,45 @@ button {
   align-items: start;
   padding-top: 18px;
   padding-bottom: 34px;
+}
+
+.case-detail-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(180px, auto);
+  align-items: center;
+  gap: 18px;
+  padding: clamp(24px, 4vw, 48px) clamp(14px, 3vw, 34px) 18px;
+}
+
+.case-detail-header h1 {
+  margin: 5px 0 8px;
+  font-size: clamp(34px, 5vw, 64px);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.case-detail-header p:not(.eyebrow) {
+  max-width: 860px;
+  margin: 0;
+  color: #ded6c9;
+  line-height: 1.62;
+}
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.detail-meta span {
+  padding: 6px 9px;
+  border: 1px solid rgba(116, 168, 198, 0.28);
+  border-radius: 999px;
+  color: #dcebf8;
+  background: rgba(116, 168, 198, 0.12);
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .panel,
@@ -817,6 +916,20 @@ td {
 }
 
 @media (max-width: 860px) {
+  .service-nav {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .service-nav nav {
+    justify-content: start;
+    overflow: auto;
+  }
+
+  #navCurrentCase {
+    max-width: 100%;
+  }
+
   .case-hero {
     grid-template-columns: 1fr;
     padding: 24px 16px;
@@ -833,8 +946,13 @@ td {
   .case-panel,
   .report-panel,
   .problem-filters,
+  .case-detail-header,
   .map-body {
     grid-template-columns: 1fr;
+  }
+
+  .detail-meta {
+    justify-content: flex-start;
   }
 
   .ops-dashboard {
