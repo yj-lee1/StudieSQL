@@ -335,10 +335,13 @@ const completedStages = new Set(JSON.parse(window.localStorage.getItem("sqlLabCo
 const stageMetrics = loadStageMetrics();
 
 const elements = {
+  landingView: document.querySelector("#landingView"),
   homeView: document.querySelector("#homeView"),
   caseView: document.querySelector("#caseView"),
   navHomeButton: document.querySelector("#navHomeButton"),
   navCurrentCase: document.querySelector("#navCurrentCase"),
+  startProblemsButton: document.querySelector("#startProblemsButton"),
+  landingLoginButton: document.querySelector("#landingLoginButton"),
   authOpenButton: document.querySelector("#authOpenButton"),
   authUserBadge: document.querySelector("#authUserBadge"),
   authUserName: document.querySelector("#authUserName"),
@@ -415,7 +418,6 @@ async function init() {
   window.caseGame = { executeSql, isCorrectReport };
   renderRoute({ replace: true });
   refreshAuth();
-  if (!window.localStorage.getItem("sqlLabTourSeen")) openTutorial();
 }
 
 function bindEvents() {
@@ -424,7 +426,9 @@ function bindEvents() {
     if (!button) return;
     navigateToStage(button.dataset.stage);
   });
-  elements.navHomeButton.addEventListener("click", navigateToProblemList);
+  elements.navHomeButton.addEventListener("click", navigateToHome);
+  elements.startProblemsButton.addEventListener("click", navigateToProblemList);
+  elements.landingLoginButton.addEventListener("click", () => openAuth("login"));
   elements.backToProblemsButton.addEventListener("click", navigateToProblemList);
   elements.authOpenButton.addEventListener("click", () => openAuth("login"));
   elements.authCloseButton.addEventListener("click", closeAuth);
@@ -437,7 +441,10 @@ function bindEvents() {
     button.addEventListener("click", () => setAuthMode(button.dataset.authMode));
   });
   document.querySelectorAll("[data-nav]").forEach((button) => {
-    button.addEventListener("click", () => navigateToProblemList());
+    button.addEventListener("click", () => {
+      if (button.dataset.nav === "problems") navigateToProblemList();
+      else navigateToInfoPage(button.dataset.nav);
+    });
   });
   window.addEventListener("hashchange", () => renderRoute());
   elements.levelFilters.addEventListener("click", (event) => {
@@ -491,12 +498,33 @@ function currentStage() {
   return stages[currentStageKey];
 }
 
+function navigateToHome() {
+  if (window.location.hash === "#/" || window.location.hash === "") {
+    renderRoute();
+    return;
+  }
+  window.location.hash = "#/";
+}
+
 function navigateToProblemList() {
-  if (window.location.hash === "#/problems" || window.location.hash === "") {
+  if (window.location.hash === "#/problems") {
     renderRoute();
     return;
   }
   window.location.hash = "#/problems";
+}
+
+function navigateToInfoPage(page) {
+  if (page === "home") {
+    navigateToHome();
+    return;
+  }
+  const targetHash = `#/${page}`;
+  if (window.location.hash === targetHash) {
+    renderRoute();
+    return;
+  }
+  window.location.hash = targetHash;
 }
 
 function navigateToStage(stageKey) {
@@ -517,9 +545,17 @@ function renderRoute({ replace = false } = {}) {
   }
 
   if (replace && !window.location.hash) {
-    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#/problems`);
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#/`);
   }
-  showProblemListView();
+  if (window.location.hash === "#/problems") {
+    showProblemListView();
+    return;
+  }
+  if (window.location.hash === "#/learn" || window.location.hash === "#/stats") {
+    showLandingView(window.location.hash.slice(2));
+    return;
+  }
+  showLandingView("home");
 }
 
 function parseStageFromHash() {
@@ -529,21 +565,36 @@ function parseStageFromHash() {
 }
 
 function showProblemListView() {
+  elements.landingView.classList.add("hidden");
   elements.homeView.classList.remove("hidden");
   elements.caseView.classList.add("hidden");
   elements.navCurrentCase.textContent = "문제 목록";
   closeDataMap();
+  closeTutorial({ markSeen: false });
   renderStageBoard();
   setActiveNav("problems");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function showCaseView(stageKey) {
+  elements.landingView.classList.add("hidden");
   elements.homeView.classList.add("hidden");
   elements.caseView.classList.remove("hidden");
   applyStage(stageKey);
   closeDataMap();
   setActiveNav("problems");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (!window.localStorage.getItem("sqlLabTourSeen")) openTutorial();
+}
+
+function showLandingView(activeNav = "home") {
+  elements.landingView.classList.remove("hidden");
+  elements.homeView.classList.add("hidden");
+  elements.caseView.classList.add("hidden");
+  elements.navCurrentCase.textContent = activeNav === "stats" ? "기록 안내" : activeNav === "learn" ? "학습 안내" : "홈";
+  closeDataMap();
+  closeTutorial({ markSeen: false });
+  setActiveNav(activeNav);
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -1034,11 +1085,6 @@ function escapeHtml(value) {
 
 const tourSteps = [
   {
-    selector: "[data-tour='stages']",
-    title: "단계별 사건 파일을 고릅니다",
-    text: "각 단계는 다른 주제와 난이도를 가진 독립 사건입니다. 카드를 누르면 현재 조사 대상이 바뀝니다.",
-  },
-  {
     selector: "[data-tour='case']",
     title: "목표와 증거 노트를 확인합니다",
     text: "목표는 결론 제출 기준이고, 증거 노트는 지금까지 결과에서 발견한 단서만 채워집니다.",
@@ -1047,6 +1093,11 @@ const tourSteps = [
     selector: "[data-tour='map-button']",
     title: "데이터 지도에서 테이블을 봅니다",
     text: "데이터 지도 열기를 누르면 넓은 ERD가 뜹니다. 테이블을 클릭하면 열과 샘플 행을 확인할 수 있습니다.",
+  },
+  {
+    selector: ".erd-canvas-wrap",
+    title: "테이블 관계를 넓게 확인합니다",
+    text: "ERD 선과 라벨로 테이블 사이의 연결을 보고, 궁금한 테이블을 눌러 샘플 데이터를 확인하세요.",
     openMap: true,
   },
   {
@@ -1073,10 +1124,10 @@ function openTutorial() {
   renderTourStep();
 }
 
-function closeTutorial() {
+function closeTutorial({ markSeen = true } = {}) {
   elements.tutorialOverlay.classList.add("hidden");
   document.querySelectorAll(".tour-target").forEach((node) => node.classList.remove("tour-target"));
-  window.localStorage.setItem("sqlLabTourSeen", "1");
+  if (markSeen) window.localStorage.setItem("sqlLabTourSeen", "1");
 }
 
 function nextTourStep() {
