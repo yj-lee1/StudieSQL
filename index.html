@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StudieSQL</title>
-    <link rel="stylesheet" href="styles.css?v=20260610a" />
+    <link rel="stylesheet" href="styles.css?v=20260610b" />
   </head>
   <body>
     <main class="app-shell">
@@ -223,6 +223,8 @@
           <button id="loginModeButton" class="active" type="button" data-auth-mode="login">로그인</button>
           <button id="registerModeButton" type="button" data-auth-mode="register">회원가입</button>
         </div>
+        <a id="githubLoginButton" class="github-login-button" href="/api/auth/github">GitHub로 계속하기</a>
+        <div class="auth-divider"><span>또는 이메일로 계속</span></div>
         <form id="authForm" class="auth-form">
           <label id="displayNameField" class="hidden">
             <span>이름</span>
@@ -239,11 +241,11 @@
           <button id="authSubmitButton" class="primary-button" type="submit">로그인</button>
           <p id="authMessage" class="auth-message"></p>
         </form>
-        <p class="oauth-note">소셜 로그인은 Google/GitHub OAuth 앱의 client id, secret, redirect URI 설정이 필요합니다.</p>
+        <p class="oauth-note">GitHub OAuth 앱의 client id, secret, callback URL 설정이 필요합니다.</p>
       </section>
     </div>
 
     <script src="vendor/sql-wasm.js"></script>
-    <script src="app.js?v=20260610a"></script>
+    <script src="app.js?v=20260610b"></script>
   </body>
 </html>

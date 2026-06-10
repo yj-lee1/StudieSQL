@@ -29,6 +29,26 @@ DATABASE_URL=postgres://localhost:5432/studiesql npm start
 
 서버는 기본적으로 `http://127.0.0.1:5174`에서 실행됩니다.
 
+## GitHub 로그인 설정
+
+GitHub 로그인은 GitHub OAuth App 설정값이 필요합니다.
+
+1. GitHub에서 Settings > Developer settings > OAuth Apps > New OAuth App으로 이동합니다.
+2. Application name: `StudieSQL`
+3. Homepage URL: `http://127.0.0.1:5174`
+4. Authorization callback URL: `http://127.0.0.1:5174/api/auth/github/callback`
+5. 발급된 Client ID와 Client Secret을 환경변수로 넣어 실행합니다.
+
+```bash
+DATABASE_URL=postgres://localhost:5432/studiesql \
+PUBLIC_BASE_URL=http://127.0.0.1:5174 \
+GITHUB_CLIENT_ID=발급받은_CLIENT_ID \
+GITHUB_CLIENT_SECRET=발급받은_CLIENT_SECRET \
+npm start
+```
+
+배포 환경에서는 Homepage URL과 Authorization callback URL을 실제 서비스 도메인으로 바꿔야 합니다.
+
 ## 단계
 
 - 1단계 미술관 살인사건: 경찰 사건 파일에서 실행범과 배후를 찾습니다.
@@ -51,7 +71,7 @@ DATABASE_URL=postgres://localhost:5432/studiesql npm start
 
 문제 풀이용 데이터는 `app.js` 안의 객체로 관리하고, 페이지가 열릴 때 브라우저 안에서 SQLite DB를 자동 생성합니다. 사용자 계정과 세션은 PostgreSQL의 `users`, `sessions` 테이블에 저장합니다.
 
-소셜 로그인은 Google/GitHub 같은 제공자에서 OAuth 앱을 만들고, client id, client secret, redirect URI를 발급받아야 합니다. 현재 구현은 이메일/비밀번호 로그인입니다.
+소셜 로그인은 GitHub OAuth만 지원합니다. GitHub 계정으로 가입하면 username, avatar URL, profile URL을 함께 저장해 나중에 공개 프로필/랭킹에서 연결할 수 있습니다.
 
 이 프로젝트는 원작 SQL Murder Mystery의 텍스트와 사건을 복제하지 않고, 같은 학습 감각을 목표로 만든 독립 한국어 사건입니다.
 즐겜(공..)

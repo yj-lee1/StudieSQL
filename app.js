@@ -568,7 +568,14 @@ function renderAuthState() {
   const loggedIn = Boolean(currentUser);
   elements.authOpenButton.classList.toggle("hidden", loggedIn);
   elements.authUserBadge.classList.toggle("hidden", !loggedIn);
-  elements.authUserName.textContent = currentUser?.displayName || "";
+  if (!loggedIn) {
+    elements.authUserName.innerHTML = "";
+    return;
+  }
+  const name = currentUser.githubUsername ? `@${currentUser.githubUsername}` : currentUser.displayName;
+  elements.authUserName.innerHTML = currentUser.githubProfileUrl
+    ? `<a href="${escapeHtml(currentUser.githubProfileUrl)}" target="_blank" rel="noreferrer">${escapeHtml(name)}</a>`
+    : escapeHtml(name);
 }
 
 function openAuth(mode = "login") {
