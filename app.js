@@ -328,6 +328,8 @@ let currentStageKey = "murder";
 let currentTourIndex = 0;
 let activeLevelFilter = "전체";
 let activeConceptFilter = "전체";
+let authMode = "login";
+let currentUser = null;
 const completedEvidence = new Map(Object.keys(stages).map((key) => [key, new Set()]));
 const completedStages = new Set(JSON.parse(window.localStorage.getItem("sqlLabCompletedStages") || "[]"));
 const stageMetrics = loadStageMetrics();
@@ -337,6 +339,20 @@ const elements = {
   caseView: document.querySelector("#caseView"),
   navHomeButton: document.querySelector("#navHomeButton"),
   navCurrentCase: document.querySelector("#navCurrentCase"),
+  authOpenButton: document.querySelector("#authOpenButton"),
+  authUserBadge: document.querySelector("#authUserBadge"),
+  authUserName: document.querySelector("#authUserName"),
+  logoutButton: document.querySelector("#logoutButton"),
+  authOverlay: document.querySelector("#authOverlay"),
+  authCloseButton: document.querySelector("#authCloseButton"),
+  authTitle: document.querySelector("#authTitle"),
+  authForm: document.querySelector("#authForm"),
+  displayNameField: document.querySelector("#displayNameField"),
+  displayNameInput: document.querySelector("#displayNameInput"),
+  emailInput: document.querySelector("#emailInput"),
+  passwordInput: document.querySelector("#passwordInput"),
+  authSubmitButton: document.querySelector("#authSubmitButton"),
+  authMessage: document.querySelector("#authMessage"),
   backToProblemsButton: document.querySelector("#backToProblemsButton"),
   detailEyebrow: document.querySelector("#detailEyebrow"),
   detailTitle: document.querySelector("#detailTitle"),
@@ -398,6 +414,7 @@ async function init() {
   setMessage("데이터 지도를 열어 테이블을 살펴본 뒤 직접 쿼리를 작성해 보세요.", "");
   window.caseGame = { executeSql, isCorrectReport };
   renderRoute({ replace: true });
+  refreshAuth();
   if (!window.localStorage.getItem("sqlLabTourSeen")) openTutorial();
 }
 
@@ -409,6 +426,16 @@ function bindEvents() {
   });
   elements.navHomeButton.addEventListener("click", navigateToProblemList);
   elements.backToProblemsButton.addEventListener("click", navigateToProblemList);
+  elements.authOpenButton.addEventListener("click", () => openAuth("login"));
+  elements.authCloseButton.addEventListener("click", closeAuth);
+  elements.authOverlay.addEventListener("click", (event) => {
+    if (event.target === elements.authOverlay) closeAuth();
+  });
+  elements.authForm.addEventListener("submit", handleAuthSubmit);
+  elements.logoutButton.addEventListener("click", logout);
+  document.querySelectorAll("[data-auth-mode]").forEach((button) => {
+    button.addEventListener("click", () => setAuthMode(button.dataset.authMode));
+  });
   document.querySelectorAll("[data-nav]").forEach((button) => {
     button.addEventListener("click", () => navigateToProblemList());
   });
@@ -524,6 +551,99 @@ function setActiveNav(navName) {
   document.querySelectorAll("[data-nav]").forEach((button) => {
     button.classList.toggle("active", button.dataset.nav === navName);
   });
+}
+
+async function refreshAuth() {
+  try {
+    const data = await apiRequest("/api/auth/me");
+    currentUser = data.user;
+    renderAuthState();
+  } catch {
+    currentUser = null;
+    renderAuthState();
+  }
+}
+
+function renderAuthState() {
+  const loggedIn = Boolean(currentUser);
+  elements.authOpenButton.classList.toggle("hidden", loggedIn);
+  elements.authUserBadge.classList.toggle("hidden", !loggedIn);
+  elements.authUserName.textContent = currentUser?.displayName || "";
+}
+
+function openAuth(mode = "login") {
+  setAuthMode(mode);
+  elements.authOverlay.classList.remove("hidden");
+  elements.authMessage.textContent = "";
+  elements.authMessage.className = "auth-message";
+  setTimeout(() => elements.emailInput.focus(), 0);
+}
+
+function closeAuth() {
+  elements.authOverlay.classList.add("hidden");
+  elements.authForm.reset();
+}
+
+function setAuthMode(mode) {
+  authMode = mode === "register" ? "register" : "login";
+  const isRegister = authMode === "register";
+  elements.authTitle.textContent = isRegister ? "회원가입" : "로그인";
+  elements.authSubmitButton.textContent = isRegister ? "회원가입" : "로그인";
+  elements.displayNameField.classList.toggle("hidden", !isRegister);
+  document.querySelectorAll("[data-auth-mode]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.authMode === authMode);
+  });
+}
+
+async function handleAuthSubmit(event) {
+  event.preventDefault();
+  elements.authSubmitButton.disabled = true;
+  setAuthMessage("처리 중입니다.", "");
+  const payload = {
+    email: elements.emailInput.value,
+    password: elements.passwordInput.value,
+  };
+  if (authMode === "register") payload.displayName = elements.displayNameInput.value;
+
+  try {
+    const data = await apiRequest(authMode === "register" ? "/api/auth/register" : "/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    currentUser = data.user;
+    renderAuthState();
+    setAuthMessage("로그인되었습니다.", "success");
+    setTimeout(closeAuth, 350);
+  } catch (error) {
+    setAuthMessage(error.message, "error");
+  } finally {
+    elements.authSubmitButton.disabled = false;
+  }
+}
+
+async function logout() {
+  await apiRequest("/api/auth/logout", { method: "POST" });
+  currentUser = null;
+  renderAuthState();
+}
+
+function setAuthMessage(text, type) {
+  elements.authMessage.textContent = text;
+  elements.authMessage.className = `auth-message ${type}`.trim();
+}
+
+async function apiRequest(path, options = {}) {
+  const response = await fetch(path, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+    credentials: "same-origin",
+    ...options,
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "요청에 실패했습니다.");
+  return data;
 }
 
 function loadStageMetrics() {

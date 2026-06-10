@@ -17,6 +17,18 @@
 
 읽기 전용 실습 DB이므로 `SELECT`, `WITH`, `PRAGMA` 조회를 사용할 수 있습니다. SQLite가 지원하는 조인, 집계, 정렬, 서브쿼리, `GROUP BY`, `HAVING` 등을 자유롭게 작성할 수 있습니다.
 
+## 로컬 서비스 실행
+
+로그인 기능은 PostgreSQL과 Node 서버를 사용합니다.
+
+```bash
+createdb studiesql
+DATABASE_URL=postgres://localhost:5432/studiesql npm run db:migrate
+DATABASE_URL=postgres://localhost:5432/studiesql npm start
+```
+
+서버는 기본적으로 `http://127.0.0.1:5174`에서 실행됩니다.
+
 ## 단계
 
 - 1단계 미술관 살인사건: 경찰 사건 파일에서 실행범과 배후를 찾습니다.
@@ -37,9 +49,9 @@
 
 ## DB 운영 메모
 
-현재 MVP는 별도 서버 DB를 만들 필요가 없습니다. 문제 데이터는 `app.js` 안의 객체로 관리하고, 페이지가 열릴 때 브라우저 안에서 SQLite DB를 자동 생성합니다. 진행도와 운영 지표는 `localStorage`에 저장합니다.
+문제 풀이용 데이터는 `app.js` 안의 객체로 관리하고, 페이지가 열릴 때 브라우저 안에서 SQLite DB를 자동 생성합니다. 사용자 계정과 세션은 PostgreSQL의 `users`, `sessions` 테이블에 저장합니다.
 
-서버 DB는 로그인, 랭킹, 유저별 풀이 로그, 문제 제작자 도구, 공개 해설/토론 같은 기능을 붙일 때 추가하는 것이 좋습니다.
+소셜 로그인은 Google/GitHub 같은 제공자에서 OAuth 앱을 만들고, client id, client secret, redirect URI를 발급받아야 합니다. 현재 구현은 이메일/비밀번호 로그인입니다.
 
 이 프로젝트는 원작 SQL Murder Mystery의 텍스트와 사건을 복제하지 않고, 같은 학습 감각을 목표로 만든 독립 한국어 사건입니다.
 즐겜(공..)

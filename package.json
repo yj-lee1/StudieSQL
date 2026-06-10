@@ -1,0 +1,13 @@
+{
+  "name": "studiesql",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Korean SQL investigation learning platform",
+  "scripts": {
+    "start": "node server.js",
+    "db:migrate": "psql \"$DATABASE_URL\" -f db/schema.sql"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  }
+}
