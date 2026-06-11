@@ -201,6 +201,121 @@ const db = {
     { id: 1, sender_person_id: 604, receiver_person_id: 601, amount: 5000000, date: "2026-07-12", memo: "야간 운송 수고비" },
     { id: 2, sender_person_id: 603, receiver_person_id: 602, amount: 120000, date: "2026-07-09", memo: "정비 부품" },
   ],
+  refund_alert: [
+    {
+      id: 1,
+      date: "2026-08-03",
+      severity: "높음",
+      description:
+        "심야 시간대 동일 고객에게 소액 환불이 반복 승인됐다. 승인자는 내부 정산 권한을 가진 직원이며, 환불 사유는 대부분 '배송 지연'으로 기록됐다.",
+    },
+    { id: 2, date: "2026-08-02", severity: "낮음", description: "쿠폰 중복 사용이 있었지만 환불과는 관련 없다." },
+  ],
+  fintech_employee: [
+    { employee_id: 1001, name: "장서윤", team: "정산", role: "검수자" },
+    { employee_id: 1002, name: "권민수", team: "정산", role: "승인자" },
+    { employee_id: 1003, name: "이도겸", team: "고객지원", role: "상담원" },
+  ],
+  fintech_customer: [
+    { customer_id: 2001, name: "홍지아", tier: "일반", city: "수원" },
+    { customer_id: 2002, name: "민세라", tier: "VIP", city: "서울" },
+    { customer_id: 2003, name: "배지훈", tier: "일반", city: "인천" },
+  ],
+  merchant_order: [
+    { order_id: 3001, customer_id: 2003, merchant: "모노마켓", amount: 48000, status: "배송 완료", ordered_at: "2026-08-01 18:20" },
+    { order_id: 3002, customer_id: 2003, merchant: "모노마켓", amount: 52000, status: "배송 완료", ordered_at: "2026-08-01 18:32" },
+    { order_id: 3003, customer_id: 2002, merchant: "북스테이션", amount: 18000, status: "배송 완료", ordered_at: "2026-08-02 10:05" },
+    { order_id: 3004, customer_id: 2001, merchant: "모노마켓", amount: 42000, status: "취소", ordered_at: "2026-08-02 13:11" },
+  ],
+  refund_request: [
+    { refund_id: 4001, order_id: 3001, customer_id: 2003, amount: 48000, reason: "배송 지연", requested_at: "2026-08-03 02:12", status: "승인" },
+    { refund_id: 4002, order_id: 3002, customer_id: 2003, amount: 52000, reason: "배송 지연", requested_at: "2026-08-03 02:19", status: "승인" },
+    { refund_id: 4003, order_id: 3003, customer_id: 2002, amount: 18000, reason: "상품 파손", requested_at: "2026-08-03 11:04", status: "승인" },
+  ],
+  refund_approval: [
+    { id: 1, refund_id: 4001, employee_id: 1002, approved_at: "2026-08-03 02:15", approval_channel: "manual_admin" },
+    { id: 2, refund_id: 4002, employee_id: 1002, approved_at: "2026-08-03 02:21", approval_channel: "manual_admin" },
+    { id: 3, refund_id: 4003, employee_id: 1001, approved_at: "2026-08-03 11:20", approval_channel: "policy_auto" },
+  ],
+  support_ticket: [
+    { ticket_id: 5001, customer_id: 2003, employee_id: 1003, opened_at: "2026-08-02 21:10", tag: "배송 지연", note: "고객이 심야 환불 가능 시간을 문의함" },
+    { ticket_id: 5002, customer_id: 2002, employee_id: 1003, opened_at: "2026-08-03 10:30", tag: "상품 파손", note: "사진 증빙 제출" },
+  ],
+  trial_alert: [
+    {
+      id: 1,
+      date: "2026-09-14",
+      severity: "긴급",
+      description:
+        "백운 병원 임상시험 2차 방문 데이터 일부가 누락됐다. 냉장 검체는 발송됐지만 중앙 랩 접수 기록이 없고, 담당 데이터 스튜어드의 수동 마감 기록이 남아 있다.",
+    },
+    { id: 2, date: "2026-09-13", severity: "주의", description: "해온 병원에서 방문 일정 변경이 있었다." },
+  ],
+  clinical_site: [
+    { site_id: 6001, name: "백운 병원", city: "광주", data_steward_id: 7001 },
+    { site_id: 6002, name: "해온 병원", city: "대구", data_steward_id: 7002 },
+  ],
+  data_staff: [
+    { staff_id: 7001, name: "신아린", role: "데이터 스튜어드" },
+    { staff_id: 7002, name: "오재하", role: "연구 코디네이터" },
+    { staff_id: 7003, name: "문가영", role: "품질 관리자" },
+  ],
+  patient_visit: [
+    { visit_id: 8001, site_id: 6001, patient_code: "BK-014", visit_round: 2, visit_date: "2026-09-14", status: "완료" },
+    { visit_id: 8002, site_id: 6001, patient_code: "BK-017", visit_round: 2, visit_date: "2026-09-14", status: "완료" },
+    { visit_id: 8003, site_id: 6002, patient_code: "HO-031", visit_round: 2, visit_date: "2026-09-13", status: "완료" },
+  ],
+  lab_sample: [
+    { sample_id: 9001, visit_id: 8001, sample_type: "혈액", storage: "냉장", lab_received_at: null, result_status: "누락" },
+    { sample_id: 9002, visit_id: 8002, sample_type: "혈액", storage: "냉장", lab_received_at: null, result_status: "누락" },
+    { sample_id: 9003, visit_id: 8003, sample_type: "혈액", storage: "냉장", lab_received_at: "2026-09-13 18:20", result_status: "완료" },
+  ],
+  courier_scan: [
+    { scan_id: 1, sample_id: 9001, vendor_id: 9501, scanned_at: "2026-09-14 16:02", location: "백운 병원", event: "픽업" },
+    { scan_id: 2, sample_id: 9002, vendor_id: 9501, scanned_at: "2026-09-14 16:03", location: "백운 병원", event: "픽업" },
+    { scan_id: 3, sample_id: 9003, vendor_id: 9502, scanned_at: "2026-09-13 16:10", location: "해온 병원", event: "픽업" },
+  ],
+  vendor_contract: [
+    { vendor_id: 9501, vendor_name: "메디링크", contract_type: "검체 운송", risk_level: "높음" },
+    { vendor_id: 9502, vendor_name: "케어무브", contract_type: "검체 운송", risk_level: "낮음" },
+  ],
+  data_closure_log: [
+    { id: 1, site_id: 6001, staff_id: 7001, closed_at: "2026-09-14 17:10", closure_type: "수동 마감", note: "랩 접수 전 임시 마감" },
+    { id: 2, site_id: 6002, staff_id: 7002, closed_at: "2026-09-13 19:30", closure_type: "자동 마감", note: "정상" },
+  ],
+  satellite_alert: [
+    {
+      id: 1,
+      date: "2026-10-05",
+      severity: "높음",
+      description:
+        "새벽 관측 데이터에서 해수면 온도 값이 비정상적으로 평탄해졌다. 같은 시간 남해 지상국의 보정 스크립트가 수동 실행됐고, 외주 분석 업체 청구 기록이 뒤따랐다.",
+    },
+    { id: 2, date: "2026-10-04", severity: "주의", description: "구름량 증가로 일부 관측 픽셀이 제외됐다." },
+  ],
+  ground_station: [
+    { station_id: 1101, name: "남해 지상국", region: "남해", operator_engineer_id: 1201 },
+    { station_id: 1102, name: "고산 지상국", region: "제주", operator_engineer_id: 1202 },
+  ],
+  space_engineer: [
+    { engineer_id: 1201, name: "노태준", role: "보정 파이프라인 담당" },
+    { engineer_id: 1202, name: "서은별", role: "수신 장비 담당" },
+    { engineer_id: 1203, name: "임해준", role: "품질 검토" },
+  ],
+  telemetry_packet: [
+    { packet_id: 1301, station_id: 1101, captured_at: "2026-10-05 03:12", metric: "sea_temp", value: 18.1, quality: "보정됨" },
+    { packet_id: 1302, station_id: 1101, captured_at: "2026-10-05 03:13", metric: "sea_temp", value: 18.1, quality: "보정됨" },
+    { packet_id: 1303, station_id: 1101, captured_at: "2026-10-05 03:14", metric: "sea_temp", value: 18.1, quality: "보정됨" },
+    { packet_id: 1304, station_id: 1102, captured_at: "2026-10-05 03:12", metric: "sea_temp", value: 17.4, quality: "원본" },
+  ],
+  calibration_job: [
+    { job_id: 1401, station_id: 1101, engineer_id: 1201, job_name: "flatten_outlier_patch", run_at: "2026-10-05 03:10", mode: "수동" },
+    { job_id: 1402, station_id: 1102, engineer_id: 1202, job_name: "cloud_filter", run_at: "2026-10-04 22:20", mode: "자동" },
+  ],
+  partner_invoice: [
+    { invoice_id: 1501, vendor_id: 1601, vendor_name: "오르빗랩", engineer_id: 1201, amount: 12000000, date: "2026-10-06", memo: "긴급 보정 컨설팅" },
+    { invoice_id: 1502, vendor_id: 1602, vendor_name: "스카이메트릭", engineer_id: 1203, amount: 1800000, date: "2026-10-02", memo: "정기 검수" },
+  ],
 };
 
 const relations = [
@@ -225,6 +340,25 @@ const relations = [
   ["operator", "person_id", "terminal_access", "person_id"],
   ["operator", "person_id", "broker_payment", "sender_person_id"],
   ["operator", "person_id", "broker_payment", "receiver_person_id"],
+  ["fintech_customer", "customer_id", "merchant_order", "customer_id"],
+  ["fintech_customer", "customer_id", "refund_request", "customer_id"],
+  ["fintech_customer", "customer_id", "support_ticket", "customer_id"],
+  ["merchant_order", "order_id", "refund_request", "order_id"],
+  ["refund_request", "refund_id", "refund_approval", "refund_id"],
+  ["fintech_employee", "employee_id", "refund_approval", "employee_id"],
+  ["fintech_employee", "employee_id", "support_ticket", "employee_id"],
+  ["clinical_site", "site_id", "patient_visit", "site_id"],
+  ["clinical_site", "site_id", "data_closure_log", "site_id"],
+  ["data_staff", "staff_id", "clinical_site", "data_steward_id"],
+  ["data_staff", "staff_id", "data_closure_log", "staff_id"],
+  ["patient_visit", "visit_id", "lab_sample", "visit_id"],
+  ["lab_sample", "sample_id", "courier_scan", "sample_id"],
+  ["vendor_contract", "vendor_id", "courier_scan", "vendor_id"],
+  ["ground_station", "station_id", "telemetry_packet", "station_id"],
+  ["ground_station", "station_id", "calibration_job", "station_id"],
+  ["space_engineer", "engineer_id", "ground_station", "operator_engineer_id"],
+  ["space_engineer", "engineer_id", "calibration_job", "engineer_id"],
+  ["space_engineer", "engineer_id", "partner_invoice", "engineer_id"],
 ];
 
 const stages = {
@@ -318,6 +452,84 @@ const stages = {
       { id: "approval", text: "변조된 승인 코드 확인", tokens: ["A3-778", "HRM-02"] },
       { id: "access", text: "터미널 접근자 확인", tokens: ["라현우", "HRM-02", "성공"] },
       { id: "payment", text: "브로커 송금 기록 확인", tokens: ["도윤서", "라현우", "5000000"] },
+    ],
+  },
+  refund: {
+    number: 4,
+    level: "Lv.2",
+    difficulty: "초중급",
+    track: "금융",
+    estimatedMinutes: 18,
+    concepts: ["JOIN", "GROUP BY", "HAVING"],
+    title: "환불 조작 패턴",
+    code: "FN-2026-0803",
+    brief:
+      "핀테크 정산 시스템에서 심야 소액 환불이 반복 승인됐다. 주문, 환불 요청, 승인자, 고객지원 기록을 연결해 내부 승인자와 수혜 고객을 찾아야 한다.",
+    objective: "내부 승인자와 수혜 고객을 최종 보고서에 제출하세요.",
+    databaseLabel: "브라우저 내장 SQLite 실습 DB · 금융 이상 거래",
+    answerLabels: ["내부 승인자", "수혜 고객"],
+    answers: [["권민수", "1002"], ["배지훈", "2003"]],
+    success: "정답입니다. 권민수가 심야 manual_admin으로 배지훈의 반복 환불을 승인했습니다.",
+    hint: "refund_alert의 반복 환불 단서를 보고, refund_request를 customer_id로 묶어 승인 횟수와 금액을 확인하세요.",
+    tables: ["refund_alert", "fintech_employee", "fintech_customer", "merchant_order", "refund_request", "refund_approval", "support_ticket"],
+    evidence: [
+      { id: "alert", text: "심야 반복 환불 알림 확인", tokens: ["심야", "배송 지연", "반복 승인"] },
+      { id: "repeat", text: "동일 고객 반복 환불 확인", tokensAny: [["배지훈", "100000"], ["2003", "100000"], ["배지훈", "2"]] },
+      { id: "requests", text: "배송 지연 사유 환불 요청 확인", tokens: ["배송 지연", "승인"] },
+      { id: "approver", text: "수동 승인자 특정", tokens: ["권민수", "manual_admin"] },
+      { id: "ticket", text: "고객지원 사전 문의 확인", tokens: ["배지훈", "심야 환불"] },
+    ],
+  },
+  clinical: {
+    number: 5,
+    level: "Lv.3",
+    difficulty: "중급",
+    track: "헬스케어",
+    estimatedMinutes: 24,
+    concepts: ["LEFT JOIN", "IS NULL", "COUNT"],
+    title: "임상 데이터 누락",
+    code: "HC-2026-0914",
+    brief:
+      "백운 병원 임상시험 방문 데이터에서 냉장 검체가 사라졌다. 방문, 검체, 운송 스캔, 데이터 마감 로그를 확인해 담당자와 운송 업체를 찾아야 한다.",
+    objective: "담당 데이터 스튜어드와 운송 업체를 최종 보고서에 제출하세요.",
+    databaseLabel: "브라우저 내장 SQLite 실습 DB · 임상 운영 로그",
+    answerLabels: ["데이터 스튜어드", "운송 업체"],
+    answers: [["신아린", "7001"], ["메디링크", "9501"]],
+    success: "정답입니다. 신아린이 백운 병원 데이터를 수동 마감했고, 메디링크가 누락 검체를 픽업한 운송 업체입니다.",
+    hint: "lab_sample에서 lab_received_at이 비어 있는 검체를 찾고, visit_id와 sample_id로 병원과 운송 스캔을 연결하세요.",
+    tables: ["trial_alert", "clinical_site", "data_staff", "patient_visit", "lab_sample", "courier_scan", "vendor_contract", "data_closure_log"],
+    evidence: [
+      { id: "alert", text: "백운 병원 누락 알림 확인", tokens: ["백운 병원", "중앙 랩 접수 기록"] },
+      { id: "missing", text: "랩 접수 누락 검체 확인", tokens: ["누락", "냉장"] },
+      { id: "site", text: "누락 검체의 병원 연결", tokens: ["백운 병원", "BK-014"] },
+      { id: "vendor", text: "픽업 업체 확인", tokens: ["메디링크", "픽업"] },
+      { id: "closure", text: "수동 마감 담당자 확인", tokens: ["신아린", "수동 마감"] },
+    ],
+  },
+  satellite: {
+    number: 6,
+    level: "Lv.5",
+    difficulty: "고급",
+    track: "우주 데이터",
+    estimatedMinutes: 32,
+    concepts: ["CTE", "GROUP BY", "집계"],
+    title: "위성 관측값 변조",
+    code: "SP-2026-1005",
+    brief:
+      "해양 관측 위성 데이터에서 특정 지상국의 해수면 온도 값이 비정상적으로 평탄해졌다. 관측 패킷, 보정 작업, 외주 청구 기록을 연결해 조작 담당자와 협력 업체를 찾아야 한다.",
+    objective: "조작 담당자와 협력 업체를 최종 보고서에 제출하세요.",
+    databaseLabel: "브라우저 내장 SQLite 실습 DB · 위성 관측 파이프라인",
+    answerLabels: ["조작 담당자", "협력 업체"],
+    answers: [["노태준", "1201"], ["오르빗랩", "1601"]],
+    success: "정답입니다. 노태준이 남해 지상국에서 수동 보정 작업을 실행했고, 오르빗랩의 긴급 보정 청구가 협력 정황과 맞습니다.",
+    hint: "telemetry_packet에서 같은 값이 반복되는 station_id를 집계하고, calibration_job과 partner_invoice를 engineer_id로 이어 보세요.",
+    tables: ["satellite_alert", "ground_station", "space_engineer", "telemetry_packet", "calibration_job", "partner_invoice"],
+    evidence: [
+      { id: "alert", text: "관측값 평탄화 알림 확인", tokens: ["해수면 온도", "평탄", "남해 지상국"] },
+      { id: "flat", text: "반복 관측값 집계 확인", tokensAny: [["18.1", "3"], ["남해 지상국", "보정됨"]] },
+      { id: "job", text: "수동 보정 작업 확인", tokens: ["flatten_outlier_patch", "수동"] },
+      { id: "engineer", text: "조작 담당자 연결", tokens: ["노태준", "보정 파이프라인"] },
+      { id: "invoice", text: "협력 업체 청구 확인", tokens: ["오르빗랩", "12000000"] },
     ],
   },
 };
@@ -1105,7 +1317,7 @@ function renderErd() {
 }
 
 function layoutTables(tables) {
-  const centerTables = ["person", "user_account", "operator", "shipment"];
+  const centerTables = ["person", "user_account", "operator", "shipment", "refund_request", "clinical_site", "ground_station"];
   const center = tables.find((table) => centerTables.includes(table)) || tables[0];
   const others = tables.filter((table) => table !== center);
   const positions = { [center]: { x: 520, y: 320, w: 210, h: 140 } };
