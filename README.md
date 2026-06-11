@@ -23,8 +23,9 @@
 
 ```bash
 createdb studiesql
-DATABASE_URL=postgres://localhost:5432/studiesql npm run db:migrate
-DATABASE_URL=postgres://localhost:5432/studiesql npm start
+cp .env.example .env
+npm run db:migrate
+npm start
 ```
 
 서버는 기본적으로 `http://127.0.0.1:5174`에서 실행됩니다.
@@ -37,15 +38,16 @@ GitHub 로그인은 GitHub OAuth App 설정값이 필요합니다.
 2. Application name: `StudieSQL`
 3. Homepage URL: `http://127.0.0.1:5174`
 4. Authorization callback URL: `http://127.0.0.1:5174/api/auth/github/callback`
-5. 발급된 Client ID와 Client Secret을 환경변수로 넣어 실행합니다.
+5. 발급된 Client ID와 Client Secret을 `.env`에 넣어 실행합니다.
 
-```bash
-DATABASE_URL=postgres://localhost:5432/studiesql \
-PUBLIC_BASE_URL=http://127.0.0.1:5174 \
-GITHUB_CLIENT_ID=발급받은_CLIENT_ID \
-GITHUB_CLIENT_SECRET=발급받은_CLIENT_SECRET \
-npm start
+```env
+DATABASE_URL=postgres://localhost:5432/studiesql
+PUBLIC_BASE_URL=http://127.0.0.1:5174
+GITHUB_CLIENT_ID=발급받은_CLIENT_ID
+GITHUB_CLIENT_SECRET=발급받은_CLIENT_SECRET
 ```
+
+`.env`는 Git에 올리지 않습니다. 예시 형식만 `.env.example`에 보관합니다.
 
 배포 환경에서는 Homepage URL과 Authorization callback URL을 실제 서비스 도메인으로 바꿔야 합니다.
 
