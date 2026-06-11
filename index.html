@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StudieSQL</title>
-    <link rel="stylesheet" href="styles.css?v=20260610c" />
+    <link rel="stylesheet" href="styles.css?v=20260611a" />
   </head>
   <body>
     <main class="app-shell">
@@ -105,6 +105,105 @@
             <span>다음: 유저별 풀이 로그 저장</span>
             <span>이후: 공개 프로필, 랭킹, 해설 비교</span>
           </div>
+        </section>
+      </div>
+
+      <div id="learnView" class="view info-view hidden">
+        <section class="info-hero" aria-label="학습 안내">
+          <div>
+            <p class="eyebrow">Learning Path</p>
+            <h1>SQL 문법을 외우기보다, 필요한 질문을 만드는 연습</h1>
+            <p>
+              StudieSQL의 학습은 강의실 순서가 아니라 조사 흐름을 따라갑니다.
+              테이블을 보고, 조건을 좁히고, 관계를 연결하고, 집계로 이상 징후를 찾는 방식으로 단계가 열립니다.
+            </p>
+          </div>
+          <button id="learnProblemsButton" class="primary-button" type="button">문제로 연습하기</button>
+        </section>
+
+        <section class="info-section" aria-label="학습 흐름">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Curriculum</p>
+              <h2>현재 학습 흐름</h2>
+            </div>
+          </div>
+          <div class="learning-grid">
+            <article>
+              <span>Lv.1</span>
+              <h3>테이블에서 단서 찾기</h3>
+              <p>SELECT, WHERE, ORDER BY로 사건 기록에서 필요한 행을 찾아냅니다.</p>
+            </article>
+            <article>
+              <span>Lv.3</span>
+              <h3>흩어진 기록 연결하기</h3>
+              <p>JOIN, LIKE, 서브쿼리로 접속 로그와 계정 정보를 이어 봅니다.</p>
+            </article>
+            <article>
+              <span>Lv.4</span>
+              <h3>패턴과 이상 징후 보기</h3>
+              <p>GROUP BY, HAVING으로 반복, 누락, 과도한 요청 같은 신호를 찾습니다.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="info-section split-section" aria-label="학습 원칙">
+          <div>
+            <p class="eyebrow">Principle</p>
+            <h2>정답 쿼리보다 사고 과정</h2>
+            <p>
+              같은 답에 도달하는 SQL은 여러 개일 수 있습니다. 그래서 StudieSQL은 정해진 쿼리 한 줄보다
+              결과에서 어떤 증거를 발견했는지, 최종 보고서가 맞는지를 중심으로 진행률을 계산합니다.
+            </p>
+          </div>
+          <div class="roadmap-list">
+            <span>먼저 데이터 지도에서 테이블 관계를 확인합니다.</span>
+            <span>작게 조회하고, 결과를 보고 다음 조건을 정합니다.</span>
+            <span>마지막 제출 전에는 근거가 충분한지 확인합니다.</span>
+          </div>
+        </section>
+      </div>
+
+      <div id="statsView" class="view info-view hidden">
+        <section class="info-hero" aria-label="기록 안내">
+          <div>
+            <p class="eyebrow">Progress</p>
+            <h1>풀이 기록은 지금까지의 조사 습관을 보여줍니다</h1>
+            <p>
+              아직은 브라우저에 저장되는 개인 기록입니다. 앞으로 로그인 계정과 연결해 공개 프로필,
+              랭킹, 풀이 로그 비교로 확장할 수 있습니다.
+            </p>
+          </div>
+          <button id="statsProblemsButton" class="primary-button" type="button">이어 풀기</button>
+        </section>
+
+        <section class="info-section" aria-label="내 기록">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">My Stats</p>
+              <h2>현재 기록</h2>
+            </div>
+            <span id="statsProgressSummary">0 / 3 완료</span>
+          </div>
+          <div class="stats-grid">
+            <article>
+              <span>완료 문제</span>
+              <strong id="statsSolved">0</strong>
+            </article>
+            <article>
+              <span>무힌트 완료</span>
+              <strong id="statsCleanSolved">0</strong>
+            </article>
+            <article>
+              <span>총 쿼리</span>
+              <strong id="statsQueries">0</strong>
+            </article>
+            <article>
+              <span>제출</span>
+              <strong id="statsSubmits">0</strong>
+            </article>
+          </div>
+          <div id="statsStageList" class="progress-list"></div>
         </section>
       </div>
 
@@ -329,6 +428,6 @@
     </div>
 
     <script src="vendor/sql-wasm.js"></script>
-    <script src="app.js?v=20260610c"></script>
+    <script src="app.js?v=20260611a"></script>
   </body>
 </html>

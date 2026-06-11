@@ -336,12 +336,16 @@ const stageMetrics = loadStageMetrics();
 
 const elements = {
   landingView: document.querySelector("#landingView"),
+  learnView: document.querySelector("#learnView"),
+  statsView: document.querySelector("#statsView"),
   homeView: document.querySelector("#homeView"),
   caseView: document.querySelector("#caseView"),
   navHomeButton: document.querySelector("#navHomeButton"),
   navCurrentCase: document.querySelector("#navCurrentCase"),
   startProblemsButton: document.querySelector("#startProblemsButton"),
   landingLoginButton: document.querySelector("#landingLoginButton"),
+  learnProblemsButton: document.querySelector("#learnProblemsButton"),
+  statsProblemsButton: document.querySelector("#statsProblemsButton"),
   authOpenButton: document.querySelector("#authOpenButton"),
   authUserBadge: document.querySelector("#authUserBadge"),
   authUserName: document.querySelector("#authUserName"),
@@ -367,6 +371,12 @@ const elements = {
   cleanSolveStat: document.querySelector("#cleanSolveStat"),
   queryStat: document.querySelector("#queryStat"),
   submitStat: document.querySelector("#submitStat"),
+  statsProgressSummary: document.querySelector("#statsProgressSummary"),
+  statsSolved: document.querySelector("#statsSolved"),
+  statsCleanSolved: document.querySelector("#statsCleanSolved"),
+  statsQueries: document.querySelector("#statsQueries"),
+  statsSubmits: document.querySelector("#statsSubmits"),
+  statsStageList: document.querySelector("#statsStageList"),
   levelFilters: document.querySelector("#levelFilters"),
   conceptFilters: document.querySelector("#conceptFilters"),
   stageGrid: document.querySelector("#stageGrid"),
@@ -429,6 +439,8 @@ function bindEvents() {
   elements.navHomeButton.addEventListener("click", navigateToHome);
   elements.startProblemsButton.addEventListener("click", navigateToProblemList);
   elements.landingLoginButton.addEventListener("click", () => openAuth("login"));
+  elements.learnProblemsButton.addEventListener("click", navigateToProblemList);
+  elements.statsProblemsButton.addEventListener("click", navigateToProblemList);
   elements.backToProblemsButton.addEventListener("click", navigateToProblemList);
   elements.authOpenButton.addEventListener("click", () => openAuth("login"));
   elements.authCloseButton.addEventListener("click", closeAuth);
@@ -551,8 +563,12 @@ function renderRoute({ replace = false } = {}) {
     showProblemListView();
     return;
   }
-  if (window.location.hash === "#/learn" || window.location.hash === "#/stats") {
-    showLandingView(window.location.hash.slice(2));
+  if (window.location.hash === "#/learn") {
+    showLearnView();
+    return;
+  }
+  if (window.location.hash === "#/stats") {
+    showStatsView();
     return;
   }
   showLandingView("home");
@@ -565,9 +581,8 @@ function parseStageFromHash() {
 }
 
 function showProblemListView() {
-  elements.landingView.classList.add("hidden");
+  hideMainViews();
   elements.homeView.classList.remove("hidden");
-  elements.caseView.classList.add("hidden");
   elements.navCurrentCase.textContent = "문제 목록";
   closeDataMap();
   closeTutorial({ markSeen: false });
@@ -577,8 +592,7 @@ function showProblemListView() {
 }
 
 function showCaseView(stageKey) {
-  elements.landingView.classList.add("hidden");
-  elements.homeView.classList.add("hidden");
+  hideMainViews();
   elements.caseView.classList.remove("hidden");
   applyStage(stageKey);
   closeDataMap();
@@ -588,14 +602,42 @@ function showCaseView(stageKey) {
 }
 
 function showLandingView(activeNav = "home") {
+  hideMainViews();
   elements.landingView.classList.remove("hidden");
-  elements.homeView.classList.add("hidden");
-  elements.caseView.classList.add("hidden");
-  elements.navCurrentCase.textContent = activeNav === "stats" ? "기록 안내" : activeNav === "learn" ? "학습 안내" : "홈";
+  elements.navCurrentCase.textContent = "홈";
   closeDataMap();
   closeTutorial({ markSeen: false });
   setActiveNav(activeNav);
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showLearnView() {
+  hideMainViews();
+  elements.learnView.classList.remove("hidden");
+  elements.navCurrentCase.textContent = "학습";
+  closeDataMap();
+  closeTutorial({ markSeen: false });
+  setActiveNav("learn");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showStatsView() {
+  hideMainViews();
+  elements.statsView.classList.remove("hidden");
+  elements.navCurrentCase.textContent = "기록";
+  closeDataMap();
+  closeTutorial({ markSeen: false });
+  renderStatsPage();
+  setActiveNav("stats");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function hideMainViews() {
+  elements.landingView.classList.add("hidden");
+  elements.learnView.classList.add("hidden");
+  elements.statsView.classList.add("hidden");
+  elements.homeView.classList.add("hidden");
+  elements.caseView.classList.add("hidden");
 }
 
 function setActiveNav(navName) {
@@ -728,6 +770,16 @@ function saveStageMetrics() {
   window.localStorage.setItem("sqlLabStageMetrics", JSON.stringify(stageMetrics));
 }
 
+function summarizeMetrics() {
+  const metrics = Object.values(stageMetrics);
+  return {
+    solved: completedStages.size,
+    cleanSolved: metrics.filter((item) => item.solvedAt && !item.hintUsed).length,
+    queryCount: metrics.reduce((sum, item) => sum + item.queryCount, 0),
+    submitCount: metrics.reduce((sum, item) => sum + item.submitCount, 0),
+  };
+}
+
 function createDatabase() {
   const database = new SQLRuntime.Database();
   Object.entries(db).forEach(([tableName, rows]) => {
@@ -842,11 +894,38 @@ function renderFilters() {
 }
 
 function renderStats() {
-  const metrics = Object.values(stageMetrics);
-  elements.solvedStat.textContent = completedStages.size;
-  elements.cleanSolveStat.textContent = metrics.filter((item) => item.solvedAt && !item.hintUsed).length;
-  elements.queryStat.textContent = metrics.reduce((sum, item) => sum + item.queryCount, 0);
-  elements.submitStat.textContent = metrics.reduce((sum, item) => sum + item.submitCount, 0);
+  const summary = summarizeMetrics();
+  elements.solvedStat.textContent = summary.solved;
+  elements.cleanSolveStat.textContent = summary.cleanSolved;
+  elements.queryStat.textContent = summary.queryCount;
+  elements.submitStat.textContent = summary.submitCount;
+}
+
+function renderStatsPage() {
+  const entries = Object.entries(stages);
+  const summary = summarizeMetrics();
+  elements.statsProgressSummary.textContent = `${summary.solved} / ${entries.length} 완료`;
+  elements.statsSolved.textContent = summary.solved;
+  elements.statsCleanSolved.textContent = summary.cleanSolved;
+  elements.statsQueries.textContent = summary.queryCount;
+  elements.statsSubmits.textContent = summary.submitCount;
+  elements.statsStageList.innerHTML = entries
+    .map(([key, stage]) => {
+      const metrics = metricsFor(key);
+      const solved = completedStages.has(key);
+      const status = solved ? "완료" : metrics.queryCount > 0 || metrics.submitCount > 0 ? "진행 중" : "대기";
+      return `
+        <article>
+          <div>
+            <span>${stage.level} · ${stage.track}</span>
+            <strong>${stage.title}</strong>
+          </div>
+          <p>${status}</p>
+          <small>쿼리 ${metrics.queryCount} · 제출 ${metrics.submitCount}${metrics.hintUsed ? " · 힌트 사용" : ""}</small>
+        </article>
+      `;
+    })
+    .join("");
 }
 
 function renderEvidence() {
